@@ -1,139 +1,85 @@
-# Next Steps (handoff for the second push)
+# Next Steps (Handoff for Third Sprint / Final Push)
 
-Status: data loading, preprocessing, baselines and evaluation are done and pushed. This document covers what remains.
-Take the LSTM first, since it is the main missing technical piece and the paper's own suggested fix is easy to try.
+## Status: What Was Completed in this Sprint
 
-## 0. Environment (do this first)
+Branch: `lstm` (Ready for PR into `main`)
 
-TensorFlow does not support the newest Python releases. Check `python --version`. If it is 3.13 or newer, recreate the env:
+1. **Environment & Data Setup:**
+   - Established Python 3.11 virtual environment (`.venv`) ensuring full compatibility with TensorFlow 2.21, scikit-learn, scipy, pandas, matplotlib, and reportlab.
+   - Extracted and verified the low-quality Auslan dataset (6,648 `.sign` files across 95 classes, ~70 per class).
+2. **Task 1: LSTM & Recurrent Model Pipeline (`src/preprocess.py`, `src/lstm_model.py`):**
+   - Implemented `preprocess_sequences` in `src/preprocess.py` returning `(N, 57, 8)` temporal sequences.
+   - Implemented `src/lstm_model.py` to fix the paper's failed formulation (`return_sequences=False` with categorical cross-entropy and softmax).
+   - Executed systematic experiment suite across 8 configurations:
+     - Baseline LSTM (128): Acc `0.383`, Macro F1 `0.370` (**5.6x improvement** over paper's `0.066`).
+     - Bidirectional LSTM (128): Acc `0.437`, Macro F1 `0.431`.
+     - Stacked LSTM (2x128): Acc `0.447`, Macro F1 `0.440` (**6.7x improvement** over paper).
+     - Hidden 64, Hidden 256, GRU, Dropout 0.0, Global Scaling benchmarks.
+   - Saved training curves to `results/lstm_training.png` and tabular report to `results/lstm_results.md`.
+3. **Task 2: Project Write-up (`docs/writeup.md`, `docs/writeup.pdf`):**
+   - Detailed two-page formal report covering problem statement, dataset discrepancies (broken UCI high-quality links), data cleaning, feature engineering, baseline vs. literature comparison, ablation study, and LSTM diagnosis.
+   - Built automated PDF compilation script `docs/generate_pdf.py` using ReportLab, outputting `docs/writeup.pdf`.
+4. **Task 3: Slides & Interactive Demo (`docs/slides.md`, `src/demo.py`):**
+   - Formatted an 8-slide presentation in Marp/markdown covering every stage of the project.
+   - Implemented `src/demo.py` with fast model caching (`results/svm_model.joblib`), supporting single `.sign` file prediction and `--random` sign classification with top-3 class confidences.
 
-```bash
-uv venv --python 3.12
-source .venv/bin/activate
-uv pip install numpy scipy pandas scikit-learn matplotlib seaborn tensorflow
-uv pip freeze > requirements.txt
-```
+---
 
-(If you would rather use PyTorch, that is fine. Keep the same input shape and evaluation.)
+## Remaining Tasks for Next Sprint
 
-Get the data in place as described in `README.md`, then confirm `python src/load_data.py` prints 6648 files and 95 classes.
+### 1. Verification & Submission Fill-ins
+- **Team Information**: Update placeholders `<Name 1 (SRN)>` and `<Name 2 (SRN)>` in:
+  - `README.md`
+  - `docs/writeup.md`
+  - `docs/generate_pdf.py`
+  - `docs/slides.md`
+- **Recompile PDF**:
+  ```bash
+  python docs/generate_pdf.py
+  ```
+- **Verify Clean PDF**: Check `docs/writeup.pdf` to ensure formatting, margins, and content fit cleanly within 2 pages as required by faculty guidelines.
 
-## 1. Task: LSTM classifier (`src/lstm_model.py`)
+### 2. Optional Stretch: Sequential Pattern Mining (`src/spm_model.py`)
+If seeking bonus technical marks or fulfilling Section 4.3 of the paper:
+- **Approach**:
+  1. Discretize each of the 8 continuous channels into symbolic tokens (e.g., $k=5$ quantile bins or SAX representation per frame).
+  2. Mine frequent sequential patterns across sign sequences (e.g., using `prefixspan` or Apriori-like sequential pattern mining).
+  3. Perform Chi-Square ($\chi^2$) ranking to select the top $K$ discriminative sequential patterns.
+  4. Encode each sign recording as a binary presence vector of length $K$.
+  5. Train and evaluate an SVM classifier on this binary feature space.
+- *Note:* The paper's own SPM implementation scored F1 $\approx 0.065$, so treat this as exploratory and benchmark against the RBF SVM ($0.601$) and Stacked LSTM ($0.440$).
 
-**Why the paper's LSTM failed (their hypothesis):** standard setups backpropagate at every time step, which suits next-value
-prediction. Here the whole signal gets one label, so the loss should come from the **final time step only**.
-In Keras, `LSTM(..., return_sequences=False)` does exactly that. The paper also used mean squared error;
-categorical cross-entropy with softmax is the natural choice for 95-way classification.
+### 3. Demo Rehearsal & Presentation Prep
+- Test the demo script during practice:
+  ```bash
+  python src/demo.py --random
+  python src/demo.py --file data/raw/low_quality/extracted/signs/john4/joke1.sign
+  ```
+- Review the presentation flow using `docs/slides.md`. Both team members should be ready to explain:
+  - Why high-quality data was unusable (UCI broken symlinks / 403).
+  - Why RBF kernel gave massive gains over linear SVM.
+  - The feature ablation finding (removing position `POS` drops accuracy from 60.2% to 24.4%).
+  - Exactly why the paper's LSTM failed and how our sequence-to-label formulation fixed it.
 
-### 1a. Add a sequence preprocessor
+---
 
-Add to `src/preprocess.py` (same steps as `preprocess`, but no flattening):
+## Git Workflow: Merging this Push
 
-```python
-def preprocess_sequences(signals, labels, feature_cols=None, target_len=TARGET_LEN):
-    """Returns X (n, target_len, n_features), y (n,), class names."""
-    X = []
-    for s in signals:
-        if feature_cols is not None:
-            s = s[:, feature_cols]
-        s = resample(s, target_len, axis=0)
-        mn, mx = s.min(axis=0), s.max(axis=0)
-        s = (s - mn) / np.where(mx - mn == 0, 1, mx - mn)
-        X.append(s)
-    classes, y = np.unique(labels, return_inverse=True)
-    return np.array(X), y, classes
-```
-
-### 1b. Starter model
-
-```python
-import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import f1_score, accuracy_score
-from tensorflow import keras
-from tensorflow.keras import layers
-
-from load_data import load_low_quality
-from preprocess import preprocess_sequences
-
-COLS = [0, 1, 2, 3, 6, 7, 8, 9]
-signals, labels, _ = load_low_quality()
-X, y, classes = preprocess_sequences(signals, labels, COLS)   # (n, 57, 8)
-
-# SAME split as the baselines so results are comparable
-X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.3, stratify=y, random_state=42)
-
-model = keras.Sequential([
-    layers.Input(shape=X.shape[1:]),
-    layers.LSTM(128, return_sequences=False),      # loss only from the final time step
-    layers.Dropout(0.3),
-    layers.Dense(128, activation="relu"),
-    layers.Dense(len(classes), activation="softmax"),
-])
-model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
-
-hist = model.fit(X_tr, y_tr, validation_split=0.15, epochs=60, batch_size=64,
-                 callbacks=[keras.callbacks.EarlyStopping(patience=8, restore_best_weights=True)])
-
-pred = model.predict(X_te).argmax(axis=1)
-print(f"LSTM: acc={accuracy_score(y_te, pred):.3f} F1={f1_score(y_te, pred, average='macro'):.3f}")
-```
-
-### 1c. Experiments to run and record
-
-Keep a table of every run (hyperparameters and test accuracy / macro F1), including the ones that do not work.
-Suggested:
-
-- Hidden size 64 / 128 / 256
-- LSTM vs GRU vs bidirectional LSTM
-- With and without dropout
-- Two stacked LSTM layers (`return_sequences=True` on the first only)
-- Per-example vs global scaling of the input
-
-Reference points: paper's LSTM F1 = 0.066 (poor), our RBF SVM F1 = 0.589. Any honest result is acceptable.
-If the LSTM still trails the SVM, say so and discuss why (about 4,600 training examples across 95 classes is small for a neural network).
-Save the training curve to `results/lstm_training.png` and the metrics to `results/lstm_results.md`.
-
-## 2. Task: write-up (`docs/writeup.md`, then export to PDF)
-
-The guidelines say both "one-page" and "two-page". Confirm with faculty, and aim for two pages at most.
-Required sections: problem statement, dataset details, approach, brief implementation overview, conclusions.
-
-Points worth including:
-- High quality dataset unavailable (UCI `tctodd` files are broken symlinks / 403), so all results are on low quality data.
-- Data cleaning: calibration recordings, empty file, constant and duplicate columns.
-- RBF SVM F1 0.589 vs paper's 0.549, and RBF helps much more here than in the paper.
-- Ablation findings from `src/evaluate.py` (fill in once run).
-- LSTM results and discussion.
-
-## 3. Task: slides and demo
-
-- 6-8 slides: problem, data, preprocessing, models, results table, confusion matrix and PCA, ablation, LSTM, conclusions.
-- Demo: `python src/baseline.py` is quick. Consider a small script that loads one `.sign` file, preprocesses it, and prints the predicted sign.
-- Both members should be able to explain every file in `src/`. Read through `load_data.py` and `preprocess.py` even though you did not write them.
-
-## 4. Optional stretch: Sequential Pattern Mining
-
-Only if the above is done. See section 4.3 of the paper (discretize, Apriori-style pattern generation, chi-square ranking, binary features, then SVM).
-The paper's own implementation scored about 0.065 F1, so treat it as exploratory.
-
-## 5. Git workflow
-
-Commit your own work under your own name so the history reflects individual contribution.
+To merge the `lstm` branch into `main`:
 
 ```bash
-git config user.name  "Your Name"
-git config user.email "you@example.com"
-git pull
-git checkout -b lstm
-# ... work ...
-git add src/lstm_model.py src/preprocess.py results/
-git commit -m "Add LSTM classifier and experiment results"
-git push -u origin lstm
+# 1. Inspect git status on lstm branch
+git status
+
+# 2. Checkout main and merge
+git checkout main
+git merge lstm
+
+# 3. Push main to origin
+git push origin main
 ```
 
-Then merge into `main` (or open a pull request). Use small commits with clear messages rather than one big push at the end.
-
-## 6. Deadlines
-
-Reviews run Oct 5 to Oct 9. Final submission (repo, PDF write-up) is due Saturday Oct 10, 11:59 PM.
+Or open a Pull Request on GitHub:
+- **Head branch**: `lstm`
+- **Base branch**: `main`
+- **PR Title**: `Add LSTM Sequence Classifier, Ablation Study, Write-up, Slides, and Demo`
