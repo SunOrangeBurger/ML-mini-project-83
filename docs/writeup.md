@@ -1,6 +1,6 @@
 # Sign Language Recognition using Temporal Classification
 **Course:** UE24CS352A Machine Learning Mini-Project (Problem 118)  
-**Authors:** Student 1 (SRN), Student 2 (SRN)  
+**Authors:** Arun Hariharan (PES2UG24AM126), Pavan Kishore (PES2UG24AM111)  
 **Reference Paper:** Cate, Dalvi, Hussain. *Sign Language Recognition using Temporal Classification* (2015).
 
 ---

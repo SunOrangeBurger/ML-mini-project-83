@@ -1,11 +1,12 @@
-# Next Steps (Handoff for Third Sprint / Final Push)
+# Project Handoff (Final Submission)
 
-## Status: What Was Completed in this Sprint
+**Team:** Arun Hariharan (PES2UG24AM126), Pavan Kishore (PES2UG24AM111)
 
-Branch: `lstm` (Ready for PR into `main`)
+## Completed
+
+The project is on `main`; the previous instructions to merge the `lstm` branch are obsolete.
 
 1. **Environment & Data Setup:**
-   - Established Python 3.11 virtual environment (`.venv`) ensuring full compatibility with TensorFlow 2.21, scikit-learn, scipy, pandas, matplotlib, and reportlab.
    - Extracted and verified the low-quality Auslan dataset (6,648 `.sign` files across 95 classes, ~70 per class).
 2. **Task 1: LSTM & Recurrent Model Pipeline (`src/preprocess.py`, `src/lstm_model.py`):**
    - Implemented `preprocess_sequences` in `src/preprocess.py` returning `(N, 57, 8)` temporal sequences.
@@ -18,38 +19,22 @@ Branch: `lstm` (Ready for PR into `main`)
    - Saved training curves to `results/lstm_training.png` and tabular report to `results/lstm_results.md`.
 3. **Task 2: Project Write-up (`docs/writeup.md`, `docs/writeup.pdf`):**
    - Detailed two-page formal report covering problem statement, dataset discrepancies (broken UCI high-quality links), data cleaning, feature engineering, baseline vs. literature comparison, ablation study, and LSTM diagnosis.
-   - Built automated PDF compilation script `docs/generate_pdf.py` using ReportLab, outputting `docs/writeup.pdf`.
+   - Added both team members' names and SRNs to the README, report, PDF, and slides.
+   - Built automated PDF compilation script `docs/generate_pdf.py` using ReportLab; added ReportLab to `requirements.txt`, regenerated the PDF, and verified that it is two pages.
 4. **Task 3: Slides & Interactive Demo (`docs/slides.md`, `src/demo.py`):**
    - Formatted an 8-slide presentation in Marp/markdown covering every stage of the project.
    - Implemented `src/demo.py` with fast model caching (`results/svm_model.joblib`), supporting single `.sign` file prediction and `--random` sign classification with top-3 class confidences.
+5. **Sequential Pattern Mining (`src/spm_model.py`):**
+  - Implemented SPM feature extraction, chi-square pattern selection, and SVM evaluation. Reused the final SPM feature matrices for both classifiers and added progress output.
+  - Tuned five configurations on an inner validation split; the selected config was `both`, window 20, max length 3, and 2,000 patterns (validation F1 `0.619`).
+  - Final 70/30 held-out test results are in `results/spm_tuned.md`: SPM + linear SVM Macro F1 `0.648`; SPM + flattened features + RBF SVM Macro F1 `0.653`.
 
----
+## Remaining
 
-## Remaining Tasks for Next Sprint
+### 1. Verify Reproducible Environment
+- The current `.venv` reports Python 3.14, while the README setup targets Python 3.11 or 3.12. Recreate a supported environment before rerunning TensorFlow experiments, or update the documented support after validating the newer runtime.
 
-### 1. Verification & Submission Fill-ins
-- **Team Information**: Update placeholders `<Name 1 (SRN)>` and `<Name 2 (SRN)>` in:
-  - `README.md`
-  - `docs/writeup.md`
-  - `docs/generate_pdf.py`
-  - `docs/slides.md`
-- **Recompile PDF**:
-  ```bash
-  python docs/generate_pdf.py
-  ```
-- **Verify Clean PDF**: Check `docs/writeup.pdf` to ensure formatting, margins, and content fit cleanly within 2 pages as required by faculty guidelines.
-
-### 2. Optional Stretch: Sequential Pattern Mining (`src/spm_model.py`)
-If seeking bonus technical marks or fulfilling Section 4.3 of the paper:
-- **Approach**:
-  1. Discretize each of the 8 continuous channels into symbolic tokens (e.g., $k=5$ quantile bins or SAX representation per frame).
-  2. Mine frequent sequential patterns across sign sequences (e.g., using `prefixspan` or Apriori-like sequential pattern mining).
-  3. Perform Chi-Square ($\chi^2$) ranking to select the top $K$ discriminative sequential patterns.
-  4. Encode each sign recording as a binary presence vector of length $K$.
-  5. Train and evaluate an SVM classifier on this binary feature space.
-- *Note:* The paper's own SPM implementation scored F1 $\approx 0.065$, so treat this as exploratory and benchmark against the RBF SVM ($0.601$) and Stacked LSTM ($0.440$).
-
-### 3. Demo Rehearsal & Presentation Prep
+### 2. Demo Rehearsal & Presentation Prep
 - Test the demo script during practice:
   ```bash
   python src/demo.py --random
@@ -61,25 +46,10 @@ If seeking bonus technical marks or fulfilling Section 4.3 of the paper:
   - The feature ablation finding (removing position `POS` drops accuracy from 60.2% to 24.4%).
   - Exactly why the paper's LSTM failed and how our sequence-to-label formulation fixed it.
 
----
+### 3. Final Review & Git
+- Review the report, slides, results, and assignment-specific submission requirements.
+- Review `git status` and the diff before staging. The current worktree contains uncommitted changes and untracked files; inspect each untracked file and stage only intended project deliverables.
+- Commit and push the approved changes to `main` when ready. No branch merge is currently pending.
 
-## Git Workflow: Merging this Push
-
-To merge the `lstm` branch into `main`:
-
-```bash
-# 1. Inspect git status on lstm branch
-git status
-
-# 2. Checkout main and merge
-git checkout main
-git merge lstm
-
-# 3. Push main to origin
-git push origin main
-```
-
-Or open a Pull Request on GitHub:
-- **Head branch**: `lstm`
-- **Base branch**: `main`
-- **PR Title**: `Add LSTM Sequence Classifier, Ablation Study, Write-up, Slides, and Demo`
+### 4. SPM Test Coverage
+- `tests/test_spm.py` is currently empty. Add focused tests for interval extraction, pattern matching/mining, and feature transformation if the SPM code will be maintained or extended.

@@ -13,6 +13,8 @@ footer: "Auslan Sign Language Recognition using Temporal Classification"
 
 *Reproducing & Extending Cate, Dalvi, Hussain (2015)*
 
+**Arun Hariharan (PES2UG24AM126) | Pavan Kishore (PES2UG24AM111)**
+
 ---
 
 ## 1. Problem Statement & Motivation
