@@ -1,0 +1,119 @@
+# Sign Language Recognition using Temporal Classification
+
+UE24CS352A Machine Learning mini-project (Problem 118).
+Reproduces and extends *"Sign Language Recognition using Temporal Classification"* (Cate, Dalvi, Hussain, 2015),
+which classifies 95 Auslan (Australian Sign Language) signs from glove-sensor time series.
+
+**Team:** `<Name 1 (SRN)>`, `<Name 2 (SRN)>`
+
+---
+
+## 1. Problem
+
+Given a multivariate time series of hand position, rotation and finger-bend readings, predict which of 95 signs was performed.
+Camera-free, sensor-based sign recognition is the goal; the paper's baseline SVM/logistic regression models do well on
+high-quality data but poorly on low-quality data, so the focus is on the low-quality dataset.
+
+## 2. Dataset
+
+Kadous's Auslan data from the UCI repository.
+
+| | Low quality (used) | High quality (not used) |
+|---|---|---|
+| Hardware | Nintendo Powerglove, 1 hand | 5DT gloves + Flock of Birds, 2 hands |
+| Rate | 50 Hz | 200 Hz |
+| Signs | 95 | 95 |
+| Examples per sign | ~70 (several signers) | 27 (one signer) |
+
+**The high quality dataset is not used.** UCI's `tctodd.tar.gz` / `tctodd.tar.bz2` are broken symlinks in the
+download, and the underlying files return `403 Forbidden`. All results here are on the low quality set.
+
+Cleaning applied in `src/load_data.py`:
+- Dropped 3 calibration recordings (`cal-full-forward/right/up`), which are not signs.
+- Dropped 1 empty file.
+- Dropped hex status columns. Of the remaining 11 numeric columns, columns 4 and 5 are constant and column 10
+  duplicates column 9, leaving **8 features** (columns 0-3 and 6-9), matching the paper.
+- Result: **6,648 recordings, 95 classes, 69-70 per class** (paper: 6,650).
+
+## 3. Approach
+
+1. **Preprocessing** (`src/preprocess.py`): temporal scaling (resample each sign to 57 frames via FFT),
+   spatial scaling (each feature to 0-1), flatten to one vector per example (57 x 8 = 456 features).
+2. **Baselines** (`src/baseline.py`, `src/experiments.py`): linear SVM, RBF SVM, logistic regression,
+   70/30 stratified split.
+3. **Evaluation** (`src/evaluate.py`): confusion matrix, 3D PCA, two rounds of feature-group ablation.
+4. **Temporal model** (`src/lstm_model.py`): LSTM over the unflattened sequence. *(in progress, see `docs/NEXT_STEPS.md`)*
+
+## 4. Setup
+
+Requires [uv](https://docs.astral.sh/uv/) and Python 3.11 or 3.12 (TensorFlow does not support the newest Python releases).
+
+```bash
+git clone <repo-url> && cd sign-lang-rec
+uv venv --python 3.12
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+uv pip install -r requirements.txt
+```
+
+### Data
+
+Download "Australian Sign Language signs" from the UCI repository and extract so that the layout is:
+
+```
+data/raw/low_quality/extracted/signs/<signer>/<sign><n>.sign
+```
+
+```bash
+mkdir -p data/raw/low_quality/extracted
+tar -xzf allsigns.tar.gz -C data/raw/low_quality/extracted
+```
+
+`data/raw/` is git-ignored.
+
+## 5. Running
+
+All commands run from the repository root.
+
+```bash
+python src/load_data.py       # sanity check: expect 6648 files, 95 classes
+python src/baseline.py        # SVM + logistic regression baseline
+python src/experiments.py     # scaling / kernel / regularisation comparison
+python src/evaluate.py        # confusion matrix, PCA, ablation -> results/
+```
+
+## 6. Results so far (low quality, 70/30 stratified split, seed 42)
+
+| Model | Scaling | Accuracy | Macro F1 |
+|---|---|---|---|
+| Linear SVM (C=1) | per-example | 0.306 | 0.308 |
+| Linear SVM (C=0.1) | per-example | 0.369 | 0.365 |
+| Logistic regression | per-example | 0.385 | 0.384 |
+| **RBF SVM (C=10)** | per-example | **0.590** | **0.589** |
+| RBF SVM (C=10) | global | 0.576 | 0.575 |
+
+Paper, for reference: SVM F1 0.549, logistic regression F1 0.436, LSTM F1 0.066, SPM F1 0.065.
+
+The RBF kernel gives a large gain here, whereas the paper reports no significant gain from RBF.
+
+Ablation and confusion-matrix results: `<fill in from results/ once evaluate.py has been run>`.
+
+## 7. Repository layout
+
+```
+data/            raw and processed data (git-ignored)
+src/             load_data, preprocess, baseline, experiments, evaluate, lstm_model
+results/         figures and metric tables
+docs/            NEXT_STEPS.md, write-up, slides
+```
+
+## 8. Contributions
+
+| Member | Work |
+|---|---|
+| `<Name 1>` | Data loading and cleaning, preprocessing, baselines, evaluation |
+| `<Name 2>` | LSTM model, write-up, slides *(update as work lands)* |
+
+## 9. Reference
+
+Cate, Dalvi, Hussain. *Sign Language Recognition using Temporal Classification.* 2015.
+Kadous, M. W. *Temporal Classification: Extending the Classification Paradigm to Multivariate Time Series.* PhD thesis, UNSW, 2002.
