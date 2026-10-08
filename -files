@@ -1,10 +1,10 @@
-# Sign Language Recognition using Temporal Classification
+ Sign Language Recognition using Temporal Classification
 
 UE24CS352A Machine Learning mini-project (Problem 118).
 Reproduces and extends *"Sign Language Recognition using Temporal Classification"* (Cate, Dalvi, Hussain, 2015),
 which classifies 95 Auslan (Australian Sign Language) signs from glove-sensor time series.
 
-**Team:** Arun Hariharan (PES2UG24AM126), Pavan Kishore (PES2UG24AM111)
+**Team:** `<Arun Hariharan (PES2UG24AM126)>`, `<Name 2 (SRN)>`
 
 ---
 
@@ -79,66 +79,39 @@ python src/load_data.py       # sanity check: expect 6648 files, 95 classes
 python src/baseline.py        # SVM + logistic regression baseline
 python src/experiments.py     # scaling / kernel / regularisation comparison
 python src/evaluate.py        # confusion matrix, PCA, ablation -> results/
-python src/lstm_model.py      # run LSTM / RNN experiment suite -> results/lstm_results.md
-python src/demo.py --random   # single-sample sign recognition demo
-python app.py                 # interactive 3D motion lab & web app -> http://localhost:5001
-python docs/generate_pdf.py   # build 2-page project PDF write-up -> docs/writeup.pdf
 ```
 
-## 6. Experimental Results (Low quality, 70/30 stratified split, seed 42)
+## 6. Results so far (low quality, 70/30 stratified split, seed 42)
 
-### Classical Baselines vs. Paper Reference
+| Model | Scaling | Accuracy | Macro F1 |
+|---|---|---|---|
+| Linear SVM (C=1) | per-example | 0.306 | 0.308 |
+| Linear SVM (C=0.1) | per-example | 0.369 | 0.365 |
+| Logistic regression | per-example | 0.385 | 0.384 |
+| **RBF SVM (C=10)** | per-example | **0.590** | **0.589** |
+| RBF SVM (C=10) | global | 0.576 | 0.575 |
 
-| Model | Scaling | Accuracy | Macro F1 | Paper F1 (Reference) |
-|---|---|---|---|---|
-| Linear SVM (C=1) | per-example | 0.306 | 0.308 | — |
-| Linear SVM (C=0.1) | per-example | 0.369 | 0.365 | 0.549 |
-| Logistic regression | per-example | 0.385 | 0.384 | 0.436 |
-| RBF SVM (C=10) | global | 0.576 | 0.575 | — |
-| **RBF SVM (C=10)** | **per-example** | **0.602** | **0.601** | **0.549** |
+Paper, for reference: SVM F1 0.549, logistic regression F1 0.436, LSTM F1 0.066, SPM F1 0.065.
 
-*Note:* The RBF kernel provides a dramatic +21.7% gain over linear classifiers on this dataset, outperforming the paper's reported SVM score.
+The RBF kernel gives a large gain here, whereas the paper reports no significant gain from RBF.
 
-### Recurrent Neural Networks (Resolving the Paper's LSTM Failure)
+Ablation and confusion-matrix results: `<fill in from results/ once evaluate.py has been run>`.
 
-The paper reported an LSTM macro F1 of **0.066**, formulating training with frame-wise MSE loss. By shifting to sequence-to-label classification (`return_sequences=False`) and categorical cross-entropy with softmax, performance increases by an order of magnitude:
-
-| Architecture / Config | Units | Dropout | Stacked | Test Accuracy | Macro F1 | vs. Paper F1 (0.066) |
-|---|---|---|---|---|---|---|
-| Baseline LSTM | 128 | 0.3 | No | 0.383 | 0.370 | +5.6x gain |
-| Hidden 64 | 64 | 0.3 | No | 0.350 | 0.339 | +5.1x gain |
-| Hidden 256 | 256 | 0.3 | No | 0.409 | 0.396 | +6.0x gain |
-| GRU | 128 | 0.3 | No | 0.334 | 0.315 | +4.8x gain |
-| Bidirectional LSTM | 128 | 0.3 | No | 0.437 | 0.431 | +6.5x gain |
-| No Dropout | 128 | 0.0 | No | 0.347 | 0.332 | +5.0x gain (overfits) |
-| **Stacked LSTM (2x128)** | **128** | **0.3** | **Yes** | **0.447** | **0.440** | **+6.7x gain** |
-
-### Feature Modality Ablation (RBF SVM)
-- **Full Model Error**: 39.8% (Accuracy: 60.2%)
-- **Without POS (x, y, z coordinates)**: Test Error surges to **75.6%** (+35.8% error increase), proving global trajectory is the dominant modality.
-- **Without ROT (wrist roll)**: Test Error = 41.8% (+2.0% change).
-- **Cumulative Removal**: $\text{All} \xrightarrow{-\text{POS}} 75.6\% \xrightarrow{-\text{ROT}} 81.7\% \xrightarrow{-\text{F1}} 82.8\% \xrightarrow{-\text{F2}} 90.0\% \xrightarrow{-\text{F3}} 95.6\%$.
-
-### Most Confused Sign Pairs
-`man` $\rightarrow$ `please` (5), `which` $\rightarrow$ `maybe` (5), `surprise` $\rightarrow$ `more` (5), `exit` $\rightarrow$ `you` (4), `hello` $\rightarrow$ `forget` (4). These share similar arm movements and differ only in fine finger curl.
-
-## 7. Repository Layout
+## 7. Repository layout
 
 ```
 data/            raw and processed data (git-ignored)
-src/             load_data, preprocess, baseline, experiments, evaluate, lstm_model, demo
-results/         figures (confusion_matrix, pca_3d, lstm_training), metrics, cached models
-docs/            writeup.md, writeup.pdf, generate_pdf.py, slides.md
-handoff.md       handoff documentation for subsequent development
+src/             load_data, preprocess, baseline, experiments, evaluate, lstm_model
+results/         figures and metric tables
+docs/            NEXT_STEPS.md, write-up, slides
 ```
 
 ## 8. Contributions
 
 | Member | Work |
 |---|---|
-| Arun Hariharan (PES2UG24AM126) | Data loading and cleaning, preprocessing, baselines, evaluation |
-| Pavan Kishore (PES2UG24AM111) | Sequence preprocessing, LSTM architecture & experiment suite, write-up (MD/PDF), slides, interactive demo |
-
+| `<Name 1>` | Data loading and cleaning, preprocessing, baselines, evaluation |
+| `<Name 2>` | LSTM model, write-up, slides *(update as work lands)* |
 
 ## 9. Reference
 

@@ -115,6 +115,13 @@ def generate_pdf(output_path="docs/writeup.pdf"):
             subtitle_style,
         )
     )
+    story.append(
+        Paragraph(
+            "<b>Authors:</b> Arun Hariharan (PES2UG24AM126), "
+            "Pavan Kishore (PES2UG24AM111)",
+            subtitle_style,
+        )
+    )
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#1a237e"), spaceAfter=6))
 
     # 1. Problem Statement

@@ -161,6 +161,8 @@ style: |
   </span>
 </div>
 
+**Arun Hariharan (PES2UG24AM126) | Pavan Kishore (PES2UG24AM111)**
+
 ---
 
 ## 1. Problem Statement & Motivation
