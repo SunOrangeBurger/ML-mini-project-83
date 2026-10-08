@@ -22,6 +22,16 @@ Branch: `lstm` (Ready for PR into `main`)
 4. **Task 3: Slides & Interactive Demo (`docs/slides.md`, `src/demo.py`):**
    - Formatted an 8-slide presentation in Marp/markdown covering every stage of the project.
    - Implemented `src/demo.py` with fast model caching (`results/svm_model.joblib`), supporting single `.sign` file prediction and `--random` sign classification with top-3 class confidences.
+5. **Task 4: Interactive Web Application & 3D Motion Lab (`app.py`, `src/server.py`, `web/`):**
+   - Built a modern web interface and REST API (`http://localhost:5001`).
+   - Features:
+     - Real-time Auslan sign classification with Top-5 probability breakdown.
+     - Interactive 3D hand spatial trajectory visualizer (Three.js) with play/pause, scrub slider, and orbit controls.
+     - Synchronized multi-channel time-series charts (Chart.js) for 8 sensor streams (X, Y, Z, Roll, Thumb, Forefinger, Middle, Ring).
+     - Sign and signer selectors, random sign sampler, and custom `.sign` file upload / text paste.
+     - Comprehensive model benchmarks dashboard (classical models + 8 RNN variants vs paper baseline).
+     - Feature modality ablation explorer and error analysis with confusion matrix & 3D PCA viewers.
+     - Complete 95 Auslan signs dictionary browser with instant search.
 
 ---
 
