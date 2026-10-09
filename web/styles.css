@@ -1,0 +1,142 @@
+/* Modern styling enhancements for Auslan Sign Language Recognition App */
+
+:root {
+  --primary: #3b82f6;
+  --primary-glow: rgba(59, 130, 246, 0.25);
+  --accent: #8b5cf6;
+  --accent-glow: rgba(139, 92, 246, 0.25);
+  --success: #10b981;
+  --success-glow: rgba(16, 185, 129, 0.25);
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --bg-dark: #090d16;
+  --card-dark: #111827;
+  --card-border: #1f293d;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-dark);
+  color: #f1f5f9;
+  overflow-x: hidden;
+}
+
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Glassmorphism Cards */
+.glass-panel {
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-panel-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-panel-hover:hover {
+  transform: translateY(-2px);
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 12px 36px 0 rgba(59, 130, 246, 0.15);
+}
+
+/* Gradient text */
+.gradient-text-primary {
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-accent {
+  background: linear-gradient(135deg, #34d399 0%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Glow effects */
+.glow-primary {
+  box-shadow: 0 0 25px var(--primary-glow);
+}
+
+.glow-accent {
+  box-shadow: 0 0 25px var(--accent-glow);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0b0f19;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f293d;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
+/* 3D Canvas Viewport */
+#trajectoryCanvasContainer {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  background: radial-gradient(circle at center, #111a2e 0%, #080d1a 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+#threeCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Scrub Range Input */
+input[type=range] {
+  accent-color: #3b82f6;
+}
+
+/* Tab active styles */
+.nav-tab.active {
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
+}
+
+/* Pulsing Badge */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+.pulse-subtle {
+  animation: pulse-subtle 3s infinite ease-in-out;
+}
+
+/* Probability meter */
+.prob-bar {
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Custom file dropzone hover */
+.dropzone-active {
+  border-color: #3b82f6 !important;
+  background: rgba(59, 130, 246, 0.08) !important;
+}
+
+/* Tooltip badge */
+.badge-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}

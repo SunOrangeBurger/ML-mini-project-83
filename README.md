@@ -49,7 +49,7 @@ Cleaning applied in `src/load_data.py`:
 Requires [uv](https://docs.astral.sh/uv/) and Python 3.11 or 3.12 (TensorFlow does not support the newest Python releases).
 
 ```bash
-git clone <repo-url> && cd sign-lang-rec
+git clone https://github.com/SunOrangeBurger/ML-mini-project-83.git && cd sign-lang-rec
 uv venv --python 3.12
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 uv pip install -r requirements.txt
@@ -81,6 +81,7 @@ python src/experiments.py     # scaling / kernel / regularisation comparison
 python src/evaluate.py        # confusion matrix, PCA, ablation -> results/
 python src/lstm_model.py      # run LSTM / RNN experiment suite -> results/lstm_results.md
 python src/demo.py --random   # single-sample sign recognition demo
+python app.py                 # interactive 3D motion lab & web app -> http://localhost:5001
 python docs/generate_pdf.py   # build 2-page project PDF write-up -> docs/writeup.pdf
 ```
 
@@ -102,7 +103,6 @@ The frontend is a lightweight, zero-build application using vanilla JavaScript, 
 3. Open your browser and navigate to: **http://localhost:5001**
 
 *Note: There is no `npm install` or Node.js setup required. The frontend works out-of-the-box once the Python server is running.*
-
 ## 6. Experimental Results (Low quality, 70/30 stratified split, seed 42)
 
 ### Classical Baselines vs. Paper Reference
