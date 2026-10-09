@@ -81,9 +81,27 @@ python src/experiments.py     # scaling / kernel / regularisation comparison
 python src/evaluate.py        # confusion matrix, PCA, ablation -> results/
 python src/lstm_model.py      # run LSTM / RNN experiment suite -> results/lstm_results.md
 python src/demo.py --random   # single-sample sign recognition demo
-python app.py                 # interactive 3D motion lab & web app -> http://localhost:5001
 python docs/generate_pdf.py   # build 2-page project PDF write-up -> docs/writeup.pdf
 ```
+
+### Running the Web Application (Frontend)
+
+The frontend is a lightweight, zero-build application using vanilla JavaScript, HTML, and CSS (with Three.js and Chart.js included via CDN). It is served directly by the Flask backend.
+
+**Setup and Launch Steps:**
+
+1. Ensure your virtual environment is activated and Python dependencies are installed:
+   ```bash
+   source .venv/bin/activate
+   uv pip install -r requirements.txt
+   ```
+2. Start the Flask backend server (which automatically serves the `web/` directory):
+   ```bash
+   python app.py
+   ```
+3. Open your browser and navigate to: **http://localhost:5001**
+
+*Note: There is no `npm install` or Node.js setup required. The frontend works out-of-the-box once the Python server is running.*
 
 ## 6. Experimental Results (Low quality, 70/30 stratified split, seed 42)
 
