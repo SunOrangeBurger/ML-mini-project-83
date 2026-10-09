@@ -49,7 +49,7 @@ Cleaning applied in `src/load_data.py`:
 Requires [uv](https://docs.astral.sh/uv/) and Python 3.11 or 3.12 (TensorFlow does not support the newest Python releases).
 
 ```bash
-git clone <repo-url> && cd sign-lang-rec
+git clone https://github.com/SunOrangeBurger/ML-mini-project-83.git && cd sign-lang-rec
 uv venv --python 3.12
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 uv pip install -r requirements.txt
