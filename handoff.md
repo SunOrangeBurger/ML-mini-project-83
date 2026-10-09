@@ -24,10 +24,20 @@ The project is on `main`; the previous instructions to merge the `lstm` branch a
 4. **Task 3: Slides & Interactive Demo (`docs/slides.md`, `src/demo.py`):**
    - Formatted an 8-slide presentation in Marp/markdown covering every stage of the project.
    - Implemented `src/demo.py` with fast model caching (`results/svm_model.joblib`), supporting single `.sign` file prediction and `--random` sign classification with top-3 class confidences.
-5. **Sequential Pattern Mining (`src/spm_model.py`):**
-  - Implemented SPM feature extraction, chi-square pattern selection, and SVM evaluation. Reused the final SPM feature matrices for both classifiers and added progress output.
-  - Tuned five configurations on an inner validation split; the selected config was `both`, window 20, max length 3, and 2,000 patterns (validation F1 `0.619`).
-  - Final 70/30 held-out test results are in `results/spm_tuned.md`: SPM + linear SVM Macro F1 `0.648`; SPM + flattened features + RBF SVM Macro F1 `0.653`.
+5. **Task 4: Interactive Web Application & 3D Motion Lab (`app.py`, `src/server.py`, `web/`):**
+   - Built a modern web interface and REST API (`http://localhost:5001`).
+   - Features:
+     - Real-time Auslan sign classification with Top-5 probability breakdown.
+     - Interactive 3D hand spatial trajectory visualizer (Three.js) with play/pause, scrub slider, and orbit controls.
+     - Synchronized multi-channel time-series charts (Chart.js) for 8 sensor streams (X, Y, Z, Roll, Thumb, Forefinger, Middle, Ring).
+     - Sign and signer selectors, random sign sampler, and custom `.sign` file upload / text paste.
+     - Comprehensive model benchmarks dashboard (classical models + 8 RNN variants vs paper baseline).
+     - Feature modality ablation explorer and error analysis with confusion matrix & 3D PCA viewers.
+     - Complete 95 Auslan signs dictionary browser with instant search.
+6. **Sequential Pattern Mining (`src/spm_model.py`):**
+   - Implemented SPM feature extraction, chi-square pattern selection, and SVM evaluation. Reused the final SPM feature matrices for both classifiers and added progress output.
+   - Tuned five configurations on an inner validation split; the selected config was `both`, window 20, max length 3, and 2,000 patterns (validation F1 `0.619`).
+   - Final 70/30 held-out test results are in `results/spm_tuned.md`: SPM + linear SVM Macro F1 `0.648`; SPM + flattened features + RBF SVM Macro F1 `0.653`.
 
 ## Remaining
 

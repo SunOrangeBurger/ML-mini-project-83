@@ -81,6 +81,7 @@ python src/experiments.py     # scaling / kernel / regularisation comparison
 python src/evaluate.py        # confusion matrix, PCA, ablation -> results/
 python src/lstm_model.py      # run LSTM / RNN experiment suite -> results/lstm_results.md
 python src/demo.py --random   # single-sample sign recognition demo
+python app.py                 # interactive 3D motion lab & web app -> http://localhost:5001
 python docs/generate_pdf.py   # build 2-page project PDF write-up -> docs/writeup.pdf
 ```
 
